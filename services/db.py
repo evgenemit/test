@@ -154,6 +154,12 @@ class Database:
             return {'status': False, 'detail': 'продавец не существует'}
         return {'status': True, 'name': seller[0]}
 
+    async def get_seller_info_by_user_id(self, uid: int):
+        seller = await self.fetchone(f"SELECT id FROM sellers WHERE user_id = {uid};")
+        if seller is None:
+            return {'status': False, 'detail': 'продавец не существует'}
+        return {'status': True, 'seller_id': seller[0]}
+
     async def get_points(self):
         data = await self.fetchall(f"SELECT id, name FROM points WHERE active = 1;")
         points = []

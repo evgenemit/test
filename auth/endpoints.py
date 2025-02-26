@@ -56,6 +56,12 @@ async def get_seller_info_by_id(seller_id: int):
     return (await db.get_seller_info_by_id(seller_id))
 
 
+@router.get('/seller/', dependencies=[Depends(is_authorized)])
+async def get_seller_info_by_user_id(user_id: int):
+    """Возвращает название продавца по id пользователя"""
+    return (await db.get_seller_info_by_user_id(user_id))
+
+
 @router.get('/points/', dependencies=[Depends(is_authorized)])
 async def get_points():
     """Возвращает пункты выдачи"""
