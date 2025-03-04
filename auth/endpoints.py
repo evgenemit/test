@@ -66,3 +66,9 @@ async def get_seller_info_by_user_id(user_id: int):
 async def get_points():
     """Возвращает пункты выдачи"""
     return (await db.get_points())
+
+
+@router.get('/client/', dependencies=[Depends(is_authorized)])
+async def get_client_code(uid: int):
+    """Возвращает код клиента"""
+    return (await db.get_client_info(uid))

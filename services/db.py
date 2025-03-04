@@ -64,7 +64,7 @@ class Database:
             return {'status': False, 'detail': 'email уже используется'}
         await self.execute(
             f"""
-            INSERT INTO clients (user_id, first_name) VALUES ({user_id}, '{user.first_name}');
+            INSERT INTO clients (user_id, first_name, code) VALUES ({user_id}, '{user.first_name}', '{create_random_string(6, digits=True)}');
             """
         )
         return {'status': True}
@@ -226,7 +226,7 @@ class Database:
     async def get_order(self, order_id: int, role: str):
         order = await self.fetchone(
             f"""
-            SELECT sellers.name, points.name, orders.about, orders.status, clients.first_name FROM orders
+            SELECT sellers.name, points.name, orders.about, orders.status, clients.first_name, points.user_id FROM orders
             JOIN clients ON clients.id = client_id
             JOIN sellers ON sellers.id = seller_id
             JOIN points ON points.id = point_id WHERE orders.id = {order_id};
@@ -239,7 +239,8 @@ class Database:
             'point_name': order[1],
             'about': order[2],
             'can_cancle': order[3] in [0, 1],
-            'can_accept': order[3] == 0
+            'can_accept': order[3] == 0,
+            'point_uid': order[5]
         }
 
     async def cancle_order(self, order_id: int, role: str):
@@ -262,6 +263,14 @@ class Database:
             f"UPDATE orders SET status = {status} WHERE id = {order_id};"
         )
         return {'status': True}
+
+    async def get_client_info(self, uid: int):
+        code, first_name = await self.fetchone(f"SELECT code, first_name FROM clients WHERE user_id = {uid};")
+        return {'status': True, 'code': code, 'first_name': first_name}
+
+    async def order_to_storage(self, order_id: int, token: str):
+        await self.execute(f"INSERT INTO storages (order_id) VALUES ({order_id});")
+        
 
 
 db = Database()

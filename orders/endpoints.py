@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, Path
+from fastapi import APIRouter, Depends, Query, Path, Header
 
 from services.db import db
 from auth.dependencies import is_authorized
@@ -38,7 +38,7 @@ async def cancle_order(order_id: int = Path(), role: str = Query()):
 
 
 @router.put('/{order_id}/', dependencies=[Depends(is_authorized)])
-async def update_order(order_id):
-    """Обновляет статус заказ"""
-    res = await db.update_order_status(order_id, 1)
+async def update_status(order_id: int, status: int = 1):
+    """Обновляет статус заказа"""
+    res = await db.update_order_status(order_id, status)
     return res

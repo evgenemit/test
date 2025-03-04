@@ -3,9 +3,12 @@ import random
 import hashlib
 
 
-def create_random_string(n: int = 10) -> str:
+def create_random_string(n: int = 10, digits: bool = False) -> str:
     """Генерирует случайную строку длиной N из букв и цифр"""
-    return ''.join([random.choice(string.ascii_letters + string.digits) for _ in range(n)])
+    symbols = string.digits
+    if not digits:
+        symbols += string.ascii_letters
+    return ''.join([random.choice(symbols) for _ in range(n)])
 
 
 def hash_password(password: str, salt: str) -> str:

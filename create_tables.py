@@ -24,7 +24,8 @@ async def create_tables():
             CREATE TABLE clients (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER REFERENCES users (id),
-                first_name TEXT NOT NULL
+                first_name TEXT NOT NULL,
+                code TEXT NOT NULL
             );
             """
         )
