@@ -148,18 +148,6 @@ class Database:
         )
         return user[0], user[1]
 
-    async def get_seller_info_by_id(self, uid: int):
-        seller = await self.fetchone(f"SELECT name FROM sellers WHERE id = {uid};")
-        if seller is None:
-            return {'status': False, 'detail': 'продавец не существует'}
-        return {'status': True, 'name': seller[0]}
-
-    async def get_seller_info_by_user_id(self, uid: int):
-        seller = await self.fetchone(f"SELECT id FROM sellers WHERE user_id = {uid};")
-        if seller is None:
-            return {'status': False, 'detail': 'продавец не существует'}
-        return {'status': True, 'seller_id': seller[0]}
-
     async def get_points(self):
         data = await self.fetchall(f"SELECT id, name FROM points WHERE active = 1;")
         points = []
@@ -223,6 +211,18 @@ class Database:
                     completed_orders.append(order_data)
         return {'status': True, 'orders': orders, 'completed_orders': completed_orders}
 
+    async def get_orders_at_point(self, client_code: str, uid: int):
+        all_orders = await self.fetchall(
+            f"""
+            SELECT id FROM orders WHERE client_id = 
+            (SELECT id FROM clients WHERE code = '{client_code}')
+            AND point_id = 
+            (SELECT id FROM points WHERE user_id = {uid}) AND status = 3;
+            """
+        )
+        all_orders = list(map(lambda x: x[0], all_orders))
+        return {'status': True, 'orders': all_orders}
+
     async def get_order(self, order_id: int, role: str):
         order = await self.fetchone(
             f"""
@@ -271,6 +271,17 @@ class Database:
     async def order_to_storage(self, order_id: int, token: str):
         await self.execute(f"INSERT INTO storages (order_id) VALUES ({order_id});")
         
-
+    async def get_user(self, user_id: int):
+        role = await self.fetchone(f"SELECT role FROM users WHERE id = {user_id};")
+        role = role[0]
+        if role == 'cl':
+            data = await self.fetchone(f"SELECT id FROM clients WHERE user_id = {user_id};")
+            return {'status': True, 'role': role, 'client_id': data[0]}
+        elif role == 'sl':
+            data = await self.fetchone(f"SELECT id FROM sellers WHERE user_id = {user_id};")
+            return {'status': True, 'role': role, 'seller_id': data[0]}
+        elif role == 'pt':
+            data = await self.fetchone(f"SELECT id FROM points WHERE user_id = {user_id};")
+            return {'status': True, 'role': role, 'point_id': data[0]}
 
 db = Database()

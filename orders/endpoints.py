@@ -23,6 +23,13 @@ async def get_orders(uid: int, role: str):
     return res
 
 
+@router.get('/client/', dependencies=[Depends(is_authorized)])
+async def get_orders(client_code: str = Query(), uid: int = Query()):
+    """Возвращает заказы пользователя в пункте выдачи"""
+    res = await db.get_orders_at_point(client_code, uid)
+    return res
+
+
 @router.get('/{order_id}/', dependencies=[Depends(is_authorized)])
 async def get_order(order_id: int = Path(), role: str = Query()):
     """Возвращает заказ"""
